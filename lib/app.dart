@@ -47,8 +47,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: lightMode,
       home: BlocConsumer<AuthCubit, AuthState>(
-
         builder: (context, authState) {
+          print(authState);
            // unauthenticated -> auth page(login/register)
         if(authState is Unauthenticated){
           return const AuthPage();
@@ -70,7 +70,14 @@ class MyApp extends StatelessWidget {
           }
 
         },
-        listener: (context, state){},
+
+        //listen for errors...
+        listener: (context, state){
+          if(state is AuthError){
+            ScaffoldMessenger.of(context)
+            .showSnackBar( SnackBar(content: Text(state.message) ));
+          }
+        },
         ),
     ),
     );
