@@ -17,7 +17,7 @@ Future<ProfileUser> fetchUserProfile(String uid) async {
           uid: uid, 
           email: userData['email'],
           name: userData['name'],
-          bio: userData['bio'],
+          bio: userData['bio'] ?? '',
           profileImageUrl: userData['profileImageUrl'].toString(),
         );
       }

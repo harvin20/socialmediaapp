@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socialmediaapp/features/auth/data/firebase_auth_repo.dart';
+import 'package:socialmediaapp/features/auth/data/firebase_profile_repo.dart';
+import 'package:socialmediaapp/features/auth/data/firebase_storage_repo.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/auth.states.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/pages/auth_page.dart';
+import 'package:socialmediaapp/features/auth/presentation/cubits/profile_cubit.dart';
 import 'package:socialmediaapp/features/auth/themes/light_mode.dart';
 import 'package:socialmediaapp/features/post/presentation/pages/home_page.dart';
 /*
@@ -34,16 +37,32 @@ app- Root Level
 class MyApp extends StatelessWidget {
 
   //auth repo
-  final authRepo = FirebaseAuthRepo();
+  final firebaseAuthRepo = FirebaseAuthRepo();
+
+  //profile repo
+  final firebaseProfileRepo = FirebaseProfileRepo();
+
+  //storage repo
+  final firebaseStorageRepo = FirebaseStorageRepo();
 
   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    //provide cubit to app
-    return  BlocProvider
-    (create: (context) => AuthCubit(authRepo: authRepo)..checkAuth(),
-    child: MaterialApp(
+    //provide cubits to app
+    return MultiBlocProvider(
+    providers: [
+      //
+      BlocProvider<AuthCubit>(create:(context) => AuthCubit(authRepo: firebaseAuthRepo)..checkAuth()
+      ),
+      //profile cubit
+      BlocProvider<ProfileCubit>(create:(context) => ProfileCubit(
+        profileRepo: firebaseProfileRepo,
+        storageRepo: firebaseStorageRepo 
+        ),
+        )
+    ],
+    child:  MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: lightMode,
       home: BlocConsumer<AuthCubit, AuthState>(
@@ -79,7 +98,6 @@ class MyApp extends StatelessWidget {
           }
         },
         ),
-    ),
-    );
+    ),);
   }
 }
