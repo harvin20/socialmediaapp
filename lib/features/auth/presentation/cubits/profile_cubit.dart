@@ -2,6 +2,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:socialmediaapp/features/auth/domain/entities/profile_user.dart';
 import 'package:socialmediaapp/features/auth/domain/repos/profile_repo.dart';
 import 'package:socialmediaapp/features/auth/domain/storage_repo.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/profile_states.dart';
@@ -16,7 +17,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       required this.storageRepo})
       : super(ProfileInitial());
 
-  // fetch user profile using repo
+  // fetch user profile using repo -> for loading single pages
   Future<void> fetchUserProfile(String uid) async {
     try {
       emit(ProfileLoading());
@@ -32,6 +33,10 @@ class ProfileCubit extends Cubit<ProfileState> {
     }catch(e) {
       emit(ProfileError(e.toString()));
     }
+  }
+  // return user profile given uid -> for loading many profiles for posts
+  Future<ProfileUser?> getUserProfile(String uid) async {
+    final user = await profileRepo.fetchUserProfile(uid);
   }
 
   //update bio and profile picture
@@ -88,5 +93,14 @@ imageDownloadUrl =
     emit(ProfileError("error updating profile: $e"));
     }
   }
+//toggle follow/unfollow
+Future<void> toggleFollow(String currentUserId, String targetUserId) async{
+  try{
+await profileRepo.toggleFollow(currentUserId, targetUserId);
+await fetchUserProfile(targetUserId);
 
+  }catch(e){
+    emit(ProfileError("Error toggling follow: $e"));
+  }
+}
 }

@@ -1,8 +1,12 @@
+import 'dart:ffi';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socialmediaapp/features/auth/domain/entities/app_user.dart';
+import 'package:socialmediaapp/features/auth/domain/entities/profile_user.dart';
 import 'package:socialmediaapp/features/auth/presentation/components/bio_box.dart';
+import 'package:socialmediaapp/features/auth/presentation/components/follow_button.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/pages/edit_profile_page.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/profile_cubit.dart';
@@ -24,6 +28,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   //current user
   late AppUser? currentUser = authCubit.currentUser;
+  //posts
+  int postCount = 0;
 
   //on startup
   @override
@@ -33,10 +39,39 @@ class _ProfilePageState extends State<ProfilePage> {
     //load user profile data
     profileCubit.fetchUserProfile(widget.uid);
   }
+  
+
+  /*
+
+FOLLOW / UNFOLLOW
+
+  */
+
+  void followButtonPressed(){
+    final ProfileState = profileCubit.state;
+    if(ProfileState is! ProfileLoaded){
+      return; // return is profile is not loaded
+    }
+    final ProfileUser = ProfileState.profileUser;
+    final isFollowing =ProfileUser.followers.contains(currentUser!.uid);
+
+    profileCubit.toggleFollow(currentUser!.uid, widget.uid);
+  }
+
+
+
 
   // BUILD UI
   @override
   Widget build(BuildContext context) {
+
+ //is own post
+
+ bool isOwnPost = widget.uid == currentUser!.uid;
+
+
+
+
     //SCAFFOLD
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
@@ -53,6 +88,8 @@ class _ProfilePageState extends State<ProfilePage> {
               foregroundColor: Theme.of(context).colorScheme.primary,
               actions: [
                 //edit profile button
+
+                if(isOwnPost)
                 IconButton(
                   onPressed: () => Navigator.push(
                     context, MaterialPageRoute(
@@ -106,6 +143,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                     
                        const SizedBox(height: 25,),
+                       //follow button
+                       if(!isOwnPost)
+                       FollowButton(
+                        onPressed:followButtonPressed,
+                         isFollowing:user.followers.contains(currentUser!.uid), 
+                         ),
               
                   //bio box
                   Padding(

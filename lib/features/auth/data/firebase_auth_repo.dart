@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socialmediaapp/features/auth/domain/entities/app_user.dart';
 import 'package:socialmediaapp/features/auth/domain/entities/repos/auth_repo.dart';
@@ -5,15 +6,22 @@ import 'package:socialmediaapp/features/auth/domain/entities/repos/auth_repo.dar
 class FirebaseAuthRepo  implements AuthRepo{
 
  final FirebaseAuth firebaseAuth = FirebaseAuth.instance; 
+ final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 @override
   Future<AppUser?> loginWithEmailPassword(String email, String password) async{
   try{
 //attenpt sign in 
-UserCredential userCredential = await firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+UserCredential userCredential = await firebaseAuth.signInWithEmailAndPassword(
+  email: email, password: password);
+  //fecth user document from firestore
+  DocumentSnapshot userDoc =
+   await firebaseFirestore.collection('users')
+  .doc(userCredential.user!.uid)
+  .get();
 // create user
 AppUser user = AppUser(uid: userCredential.user!.uid, 
 email: email, 
-name: '',
+name: userDoc['name']
 );
 // return user
 return user; 
@@ -62,11 +70,17 @@ return user;
     return null;
    }
 
+   //fetc user document from firestorer
+   DocumentSnapshot userDoc = await firebaseFirestore.collection("users").doc(firebaseUser.uid).get();
+//check if user doc exist
+if(!userDoc.exists){
+  return null;
+}
    // user exist 
    return AppUser(
   uid:firebaseUser.uid, 
    email: firebaseUser.email!, 
-   name: ''
+   name: userDoc['name'],
    );
  }
 }

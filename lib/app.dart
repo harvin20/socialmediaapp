@@ -6,9 +6,12 @@ import 'package:socialmediaapp/features/auth/data/firebase_storage_repo.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/auth.states.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/pages/auth_page.dart';
+import 'package:socialmediaapp/features/auth/presentation/cubits/post_cubit.dart';
 import 'package:socialmediaapp/features/auth/presentation/cubits/profile_cubit.dart';
 import 'package:socialmediaapp/features/auth/themes/light_mode.dart';
 import 'package:socialmediaapp/features/post/presentation/pages/home_page.dart';
+import 'package:socialmediaapp/features/profile/data/firebase_post_repo.dart';
+
 /*
 
 
@@ -45,6 +48,9 @@ class MyApp extends StatelessWidget {
   //storage repo
   final firebaseStorageRepo = FirebaseStorageRepo();
 
+  //post repo
+  final firebasePostRepo = FirebasePostRepo(); 
+
   MyApp({super.key});
 
   @override
@@ -52,7 +58,7 @@ class MyApp extends StatelessWidget {
     //provide cubits to app
     return MultiBlocProvider(
     providers: [
-      //
+      
       BlocProvider<AuthCubit>(create:(context) => AuthCubit(authRepo: firebaseAuthRepo)..checkAuth()
       ),
       //profile cubit
@@ -60,7 +66,14 @@ class MyApp extends StatelessWidget {
         profileRepo: firebaseProfileRepo,
         storageRepo: firebaseStorageRepo 
         ),
-        )
+        ),
+
+        //post cubit
+        BlocProvider<PostCubit>(
+          create: (context) => PostCubit(
+            postRepo: firebasePostRepo, 
+            storageRepo: firebaseStorageRepo),
+        ),
     ],
     child:  MaterialApp(
       debugShowCheckedModeBanner: false,
